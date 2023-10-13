@@ -13,7 +13,8 @@ const btnHold = document.querySelector('.btn--hold');
 
 let cureentScore = 0;
 let activePlayer = 0;
-let scores = [0, 0];
+const scores = [0, 0];
+let gameCondition = false;
 
 function init() {
   score0.textContent = 0;
@@ -23,6 +24,12 @@ function init() {
   dice.classList.add('hidden');
   activePlayer = 0;
   cureentScore = 0;
+  gameCondition = false;
+  scores[0] = 0;
+  scores[1] = 0;
+  player0.classList.remove('player--winner');
+  player1.classList.remove('player--winner', 'player--active');
+  player0.classList.add('player--active');
 }
 
 function switchPlayer() {
@@ -37,23 +44,41 @@ function switchPlayer() {
 init();
 
 btnRoll.addEventListener('click', function () {
-  const diceRoll = Math.trunc(Math.random() * 6) + 1;
-  dice.src = `imgs/dice-${diceRoll}.png`;
-  dice.classList.remove('hidden');
+  if (!gameCondition) {
+    const diceRoll = Math.trunc(Math.random() * 6) + 1;
+    dice.src = `imgs/dice-${diceRoll}.png`;
+    dice.classList.remove('hidden');
 
-  if (diceRoll !== 1) {
-    cureentScore += diceRoll;
-    document.getElementById(`current--${activePlayer}`).textContent =
-      cureentScore;
+    if (diceRoll !== 1) {
+      cureentScore += diceRoll;
+      document.getElementById(`current--${activePlayer}`).textContent =
+        cureentScore;
+    } else {
+      switchPlayer();
+    }
   } else {
-    switchPlayer();
   }
 });
 
 btnHold.addEventListener('click', function () {
-  scores[activePlayer] += cureentScore;
-  document.getElementById(`score--${activePlayer}`).textContent =
-    scores[activePlayer];
-  console.log(scores);
-  switchPlayer();
+  if (!gameCondition) {
+    scores[activePlayer] += cureentScore;
+    document.getElementById(`score--${activePlayer}`).textContent =
+      scores[activePlayer];
+
+    if (scores[activePlayer] >= 100) {
+      document
+        .querySelector(`.player--${activePlayer}`)
+        .classList.add('player--winner');
+      document.getElementById(`current--${activePlayer}`).textContent = 0;
+      dice.classList.toggle('hidden');
+      gameCondition = true;
+    } else {
+      switchPlayer();
+    }
+  }
+});
+
+btnNew.addEventListener('click', function () {
+  init();
 });
